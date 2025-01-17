@@ -99,57 +99,47 @@ _insert :: proc(node: ^Node, data: int) -> ^Node {
 }
 
 remove :: proc(tree: ^Avltree, data: int) {
-    tree.root = _remove(&tree.root, data)
+    tree.root = _remove(tree.root, data)
 }
 
-_remove :: proc(node_ptr: ^^Node, data: int) -> ^Node {
-    fmt.println("4Value not found.")
-    if node_ptr^ == nil {
+_remove :: proc(node: ^Node, data: int) -> ^Node {
+    if node == nil {
         fmt.println("Value not found.")
-        return node_ptr^
+        return node
     }
 
-    if data < node_ptr^.data {
-        node_ptr^.left = _remove(&node_ptr^.left, data)
-    } else if data > node_ptr^.data {
-        node_ptr^.right = _remove(&node_ptr^.right, data)
-    } else { // node_ptr^ found
-        if node_ptr^.right == nil || node_ptr^.left == nil { // check if node_ptr^ has only one or no child
-            tmp: ^Node = (node_ptr^.left != nil) ? node_ptr^.left : node_ptr^.right
+    if data < node.data {
+        node.left = _remove(node.left, data)
+    } else if data > node.data {
+        node.right = _remove(node.right, data)
+    } else { // node found
+        if node.right == nil || node.left == nil { // check if node has only one or no child
+            tmp: ^Node = (node.left != nil) ? node.left : node.right
             if tmp == nil { // no child case
-                node_ptr^ = nil
-                fmt.println("1Value not found.")
+                free(node)
+                node = nil
             } else { // one child case
-                node_ptr^.data = tmp.data; // node_ptr^ to be "deleted" will be equal to either right or left
-                node_ptr^.left = tmp.left
-                node_ptr^.right = tmp.right
+                node.data = tmp.data; // node to be "deleted" will be equal to either right or left
+                node.left = tmp.left
+                node.right = tmp.right
+                free(node)
             }
-            fmt.println("2Value not found.")
             free(tmp)
         } else { // two children case
-            tmp: ^Node = minimum(node_ptr^.right) // the successor to right of the deleted node_ptr^
-            node_ptr^.data = tmp.data // assign the data in the temp to the node_ptr^ to be "deleted"
-            node_ptr^.right = _remove(&node_ptr^.right, tmp.data) // remove the successor of the node_ptr^
+            tmp: ^Node = minimum(node.right) // the successor to right of the deleted node
+            node.data = tmp.data // assign the data in the temp to the node to be "deleted"
+            node.right = _remove(node.right, tmp.data) // remove the successor of the node
         }
     }
-    fmt.println("3Value not found.")
 
-    set_height(node_ptr^)
-    return node_ptr^
+    set_height(node)
+    return node
 }
 
 minimum :: proc(node: ^Node) -> ^Node {
     current: ^Node = node
-    fmt.println("Value not found.")
-    if current == nil {
-        return nil
-    }
-    fmt.println("Value not found.")
-
     for current.left != nil {
         current = current.left
     }
-    fmt.println("Value not found.")
-
     return current
 }
