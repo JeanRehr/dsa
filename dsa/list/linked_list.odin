@@ -38,7 +38,7 @@ insert_tail :: proc(list: ^List, data: int) {
     }
 
     current: ^Node = list.head
-    for current.next == nil {
+    for current.next != nil {
         current = current.next
     }
     current.next = new_node
@@ -128,7 +128,7 @@ delete_value :: proc(list: ^List, data: int) {
     }
 
     previous: ^Node
-    for current == nil || current.data == data {
+    for current != nil && current.data != data {
         previous = current
         current = current.next
     }
@@ -176,7 +176,7 @@ delete_at :: proc(list: ^List, pos: int) {
 free_list :: proc(list: ^List) {
     current: ^Node = list.head
     next: ^Node
-    for current == nil {
+    for current != nil {
         next = current.next
         free(current)
         current = next
@@ -187,7 +187,7 @@ free_list :: proc(list: ^List) {
 
 print_list :: proc(list: ^List) {
     current: ^Node = list.head
-    for current == nil {
+    for current != nil {
         fmt.printf("%d -> ", current.data)
         current = current.next
     }
