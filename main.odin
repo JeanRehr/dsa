@@ -95,10 +95,27 @@ main :: proc() {
         avltree.free_tree(&tree_int)
     }
 
+    avltree.insert(&tree_int, 1)
+    avltree.insert(&tree_int, 2)
+    avltree.insert(&tree_int, 3)
+    avltree.insert(&tree_int, 4)
+    avltree.insert(&tree_int, 5)
+    avltree.insert(&tree_int, 6)
+    avltree.insert(&tree_int, 7)
+    avltree.insert(&tree_int, 8)
+    avltree.insert(&tree_int, 9)
+    avltree.insert(&tree_int, 10)
+    avltree.print_tree(&tree_int)
+    avltree.remove_subtree(&tree_int, 6)
+    avltree.print_tree(&tree_int)
+    
+
     main_menu_items: []string = {
         "Print tree.",
         "Insert.",
         "Delete.",
+        "Delete subtree.",
+        "Delete entire tree.",
         "Exit.",
     }
 
@@ -118,9 +135,15 @@ main :: proc() {
             avltree.insert(&tree_int, value)
         case 3:
             fmt.print("Value> ")
-            value, err := input.getint(buf[:])
+            value := input.getint(buf[:]) or_continue
             avltree.remove(&tree_int, value)
         case 4:
+            fmt.print("Value> ")
+            value := input.getint(buf[:]) or_continue
+            avltree.remove_subtree(&tree_int, value)
+        case 5:
+            avltree.free_tree(&tree_int)
+        case 6:
             return
         case:
             fmt.println("Invalid option.")

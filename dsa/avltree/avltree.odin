@@ -48,7 +48,7 @@ _print_tree :: proc(node: ^Node, level: int) {
 
         if node.left != nil {
             _print_tree(node.left, next_level)
-        } else { // Node is nil, print a _ in its place
+        } else { // node is nil, print a _ in its place
             for i := 0; i < next_level; i += 1 {
                 fmt.print("    ")
             }
@@ -57,7 +57,7 @@ _print_tree :: proc(node: ^Node, level: int) {
 
         if node.right != nil {
             _print_tree(node.right, next_level)
-        } else { // Node is nil, print a _ in its place
+        } else { // node is nil, print a _ in its place
             for i := 0; i < next_level; i += 1 {
                 fmt.print("    ")
             }
@@ -131,6 +131,31 @@ _remove :: proc(node: ^Node, data: int) -> ^Node {
     return rebalance(node)
 }
 
+remove_subtree :: proc(tree: ^Avltree, data: int) {
+    tree.root = _remove_subtree(tree.root, data)
+}
+
+_remove_subtree :: proc(node: ^Node, data: int) -> ^Node {
+    node := node
+    if node == nil {
+        fmt.println("Value not found.")
+        return node
+    }
+
+    if data < node.data {
+        node.left = _remove_subtree(node.left, data)
+    } else if data > node.data {
+        node.right = _remove_subtree(node.right, data)
+    } else { // node found
+        _free_tree(node)
+        node = nil
+        return node
+    }
+
+    set_height(node)
+    return rebalance(node)
+}
+
 minimum :: proc(node: ^Node) -> ^Node {
     node := node
     for node.left != nil {
@@ -151,6 +176,7 @@ _free_tree :: proc(node: ^Node) {
         free(node)
     }
 }
+
 /*
            4                        2
           / \                      / \
