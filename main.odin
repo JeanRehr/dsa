@@ -95,13 +95,7 @@ main :: proc() {
         avltree.free_tree(&tree_int)
     }
 
-    avltree.insert(&tree_int, 3)
-    avltree.insert(&tree_int, 2)
-    avltree.insert(&tree_int, 1)
-    avltree.print_tree(&tree_int)
-
-
-/*    main_menu_items: []string = {
+    main_menu_items: []string = {
         "Print tree.",
         "Insert.",
         "Delete.",
@@ -132,7 +126,6 @@ main :: proc() {
             fmt.println("Invalid option.")
         }
     }
-    */
     
     /*
     list_int: list.List

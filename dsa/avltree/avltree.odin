@@ -42,7 +42,7 @@ _print_tree :: proc(node: ^Node, level: int) {
             fmt.print("    ")
         }
 
-        fmt.printfln("%d H: %d BF: %d", node.data, height(node), balance_factor(node))
+        fmt.printfln("%d", node.data)
 
         next_level := level + 1
 
@@ -177,7 +177,9 @@ right_rotation :: proc(node: ^Node) -> ^Node {
     left_of_node.right = node
     node.left = right_of_left_of_node
 
-    return node
+    set_height(node)
+    set_height(left_of_node)
+    return left_of_node
 }
 
 left_rotation :: proc(node: ^Node) -> ^Node {
@@ -187,7 +189,9 @@ left_rotation :: proc(node: ^Node) -> ^Node {
     right_of_node.left = node
     node.right = left_of_right_of_node
     
-    return node
+    set_height(node)
+    set_height(right_of_node)
+    return right_of_node
 }
 
 rebalance :: proc(node: ^Node) -> ^Node {
