@@ -29,22 +29,22 @@ insert_menu :: proc(list_user: ^list.List) {
 
     buf: [256]byte
     fmt.print("Option> ")
-    opt_input := input.getint(buf[:])
+    opt_input, err := input.getint(buf[:])
 
     switch opt_input {
         case 1:
             fmt.print("Value> ")
-            value := input.getint(buf[:])
+            value, err := input.getint(buf[:])
             list.insert_head(list_user, value)
         case 2:
             fmt.print("Value> ")
-            value := input.getint(buf[:])
+            value, err := input.getint(buf[:])
             list.insert_tail(list_user, value)
         case 3:
             fmt.print("Position> ")
-            pos := input.getint(buf[:])
+            pos, err := input.getint(buf[:])
             fmt.print("Value> ")
-            value := input.getint(buf[:])
+            value, err2 := input.getint(buf[:])
             list.insert_at(list_user, value, pos)
         case 4:
             return
@@ -66,12 +66,12 @@ delete_menu :: proc(list_user: ^list.List) {
 
     buf: [256]byte
     fmt.print("Option> ")
-    opt_input := input.getint(buf[:])
+    opt_input, err := input.getint(buf[:])
 
     switch opt_input {
         case 1:
             fmt.print("Value> ")
-            value := input.getint(buf[:])
+            value, err := input.getint(buf[:])
             fmt.printfln("Deleting value %d", value)
             list.delete_value(list_user, value)
         case 2:
@@ -80,7 +80,7 @@ delete_menu :: proc(list_user: ^list.List) {
             list.delete_tail(list_user)
         case 4:
             fmt.print("Position> ")
-            pos := input.getint(buf[:])
+            pos, err := input.getint(buf[:])
             list.delete_at(list_user, pos)
         case 5:
             return
@@ -91,7 +91,17 @@ delete_menu :: proc(list_user: ^list.List) {
 
 main :: proc() {
     tree_int: avltree.Avltree
-    main_menu_items: []string = {
+    defer {
+        avltree.free_tree(&tree_int)
+    }
+
+    avltree.insert(&tree_int, 3)
+    avltree.insert(&tree_int, 2)
+    avltree.insert(&tree_int, 1)
+    avltree.print_tree(&tree_int)
+
+
+/*    main_menu_items: []string = {
         "Print tree.",
         "Insert.",
         "Delete.",
@@ -103,18 +113,18 @@ main :: proc() {
 
         buf: [256]byte
         fmt.print("Option> ")
-        opt_input := input.getint(buf[:])
+        opt_input, err := input.getint(buf[:])
 
         switch opt_input {
         case 1:
-            avltree.print_tree(tree_int.root)
+            avltree.print_tree(&tree_int)
         case 2:
             fmt.print("Value> ")
-            value := input.getint(buf[:])
+            value := input.getint(buf[:]) or_continue
             avltree.insert(&tree_int, value)
         case 3:
             fmt.print("Value> ")
-            value := input.getint(buf[:])
+            value, err := input.getint(buf[:])
             avltree.remove(&tree_int, value)
         case 4:
             return
@@ -122,6 +132,7 @@ main :: proc() {
             fmt.println("Invalid option.")
         }
     }
+    */
     
     /*
     list_int: list.List

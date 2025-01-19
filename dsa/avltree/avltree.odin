@@ -11,7 +11,6 @@ Node :: struct {
 
 Avltree :: struct {
     root: ^Node,
-    size: int,
 }
 
 create_node :: proc(data: int) -> ^Node {
@@ -21,25 +20,20 @@ create_node :: proc(data: int) -> ^Node {
     return new_node
 }
 
-set_height :: proc(node: ^Node) {
-    left_height: int
-    right_height: int
-
-    // getting the max of either left or right height
-    if node.left != nil do left_height = node.left.height
-
-    if node.right != nil do right_height = node.right.height
-    
-    if right_height > left_height {
-        node.height = 1 + right_height 
-    } else {
-        node.height = 1 + left_height
-    }
+height :: proc(node: ^Node) -> int {
+    return node == nil ? 0 : node.height
 }
 
+set_height :: proc(node: ^Node) {
+    node.height = 1 + max(height(node.left), height(node.right))
+}
 
-print_tree :: proc(node: ^Node) {
-    _print_tree(node, 0)
+balance_factor :: proc(node: ^Node) -> int {
+    return node == nil ? 0 : height(node.left) - height(node.right)
+}
+
+print_tree :: proc(tree: ^Avltree) {
+    _print_tree(tree.root, 0)
 }
 
 _print_tree :: proc(node: ^Node, level: int) {
@@ -48,7 +42,7 @@ _print_tree :: proc(node: ^Node, level: int) {
             fmt.print("    ")
         }
 
-        fmt.println(node.data)
+        fmt.printfln("%d H: %d BF: %d", node.data, height(node), balance_factor(node))
 
         next_level := level + 1
 
@@ -94,8 +88,7 @@ _insert :: proc(node: ^Node, data: int) -> ^Node {
     }
 
     set_height(node)
-
-    return node
+    return rebalance(node)
 }
 
 remove :: proc(tree: ^Avltree, data: int) {
@@ -103,6 +96,7 @@ remove :: proc(tree: ^Avltree, data: int) {
 }
 
 _remove :: proc(node: ^Node, data: int) -> ^Node {
+    node := node
     if node == nil {
         fmt.println("Value not found.")
         return node
@@ -113,18 +107,15 @@ _remove :: proc(node: ^Node, data: int) -> ^Node {
     } else if data > node.data {
         node.right = _remove(node.right, data)
     } else { // node found
-        if node.right == nil || node.left == nil { // check if node has only one or no child
+        if (node.right == nil) || (node.left == nil) { // check if node has only one or no child
             tmp: ^Node = (node.left != nil) ? node.left : node.right
             if tmp == nil { // no child case
-                free(node)
+                tmp = node
                 node = nil
             } else { // one child case
-                node.data = tmp.data; // node to be "deleted" will be equal to either right or left
-                node.left = tmp.left
-                node.right = tmp.right
-                free(node)
+                node = tmp // node to be "deleted" will be equal to either right or left
+                free(tmp)
             }
-            free(tmp)
         } else { // two children case
             tmp: ^Node = minimum(node.right) // the successor to right of the deleted node
             node.data = tmp.data // assign the data in the temp to the node to be "deleted"
@@ -132,14 +123,93 @@ _remove :: proc(node: ^Node, data: int) -> ^Node {
         }
     }
 
+    if node == nil {
+        return node
+    }
+
     set_height(node)
-    return node
+    return rebalance(node)
 }
 
 minimum :: proc(node: ^Node) -> ^Node {
-    current: ^Node = node
-    for current.left != nil {
-        current = current.left
+    node := node
+    for node.left != nil {
+        node = node^.left
     }
-    return current
+    return node
+}
+
+free_tree :: proc(tree: ^Avltree) {
+    _free_tree(tree.root)
+    tree.root = nil
+}
+
+_free_tree :: proc(node: ^Node) {
+    if (node != nil) {
+        _free_tree(node.left)
+        _free_tree(node.right)
+        free(node)
+    }
+}
+/*
+           4                        2
+          / \                      / \
+         2   6                    1   4
+        / \           =>         /   / \
+       1   3                   -1   3   6
+      /
+    -1
+*/
+
+/*
+
+     3          2
+    /          / \
+   2       => 1   3
+  /
+ 1
+*/
+
+right_rotation :: proc(node: ^Node) -> ^Node {
+    left_of_node: ^Node = node.left
+    right_of_left_of_node: ^Node = left_of_node.right
+
+    left_of_node.right = node
+    node.left = right_of_left_of_node
+
+    return node
+}
+
+left_rotation :: proc(node: ^Node) -> ^Node {
+    right_of_node: ^Node = node.right
+    left_of_right_of_node: ^Node = right_of_node.left
+
+    right_of_node.left = node
+    node.right = left_of_right_of_node
+    
+    return node
+}
+
+rebalance :: proc(node: ^Node) -> ^Node {
+    balance: int = balance_factor(node)
+    
+    if balance > 1 && balance_factor(node.left) >= 0 {
+        return right_rotation(node)
+    }
+
+    if balance < -1 && balance_factor(node.right) <= 0 {
+        return left_rotation(node)
+    }
+
+    if balance > 1 && balance_factor(node.left) <= 0 {
+        node.left = left_rotation(node.left)
+        return right_rotation(node)
+    }
+
+    if balance < -1 && balance_factor(node.right) >= 0 {
+        node.right = right_rotation(node.right)
+        return left_rotation(node)
+    }
+
+    return node
 }

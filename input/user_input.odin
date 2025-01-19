@@ -4,55 +4,51 @@ import "core:fmt"
 import "core:strconv"
 import "core:os"
 
-Parse_Error_Code :: enum {
-    None,
+
+Parse_Error :: enum {
+    None = 0,
     Not_Number,
     No_Input,
     Err_Reading,
 }
 
-Parse_Error :: struct {
-    message: string,
-    code: Parse_Error_Code,
+parse_err_mes := [Parse_Error]string {
+    .None = "ok",
+    .Not_Number = "Input not a number.",
+    .No_Input = "Empty input.",
+    .Err_Reading = "Error reading input.",
 }
 
-parse_buf :: proc(buf: []byte) -> (string, Parse_Error) {
+parse_buf :: proc(buf: []byte) -> (string,  Parse_Error) {
     num_bytes, err := os.read(os.stdin, buf[:])
 
     input_str := string(buf[:num_bytes])
     
     if err != nil {
         fmt.println("Error reading input: ", err)
-        return input_str, Parse_Error {
-            message = "Error reading input.",
-            code = .Err_Reading,
-        }
+        return input_str, Parse_Error.Err_Reading
     }
 
-    if buf[0] == 13 || buf[0] == 10 { // ascii values for carriage return or newline
-        return input_str, Parse_Error {
-            message = "Empty input.",
-            code = .No_Input,
-        }
+    // ascii values for carriage return or newline
+    if buf[0] == 13 || buf[0] == 10 {
+        return input_str, Parse_Error.No_Input
     }
 
-    if buf[0] < 48 || buf[0] > 57 { // ascii value for 0 and 9, value for negative (-) is 45
-        return input_str, Parse_Error {
-            message = "Input not a number.",
-            code = .Not_Number,
-        }
+    // ascii value for 0 and 9, value for negative (-) is 45
+    if (buf[0] != 45 || buf[0] != 43) && (buf[0] < 48 || buf[0] > 57) {
+        return input_str, Parse_Error.Not_Number
     }
 
-    return input_str, Parse_Error{code = .None}
+    return input_str, Parse_Error.None
 }
 
-getint :: proc(buf: []byte) -> int {
+getint :: proc(buf: []byte) -> (int, Parse_Error) {
     str, err := parse_buf(buf[:])
 
-    if err.code != .None {
-        fmt.println(err.message)
-        return 0
+    if err != Parse_Error.None {
+        fmt.println(parse_err_mes[err])
+        return 0, err
     }
     
-    return strconv.atoi(str)
+    return strconv.atoi(str), Parse_Error.None
 }
