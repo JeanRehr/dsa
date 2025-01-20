@@ -113,9 +113,11 @@ _remove :: proc(node: ^Node, data: int) -> ^Node {
                 tmp = node
                 node = nil
             } else { // one child case
-                node = tmp // node to be "deleted" will be equal to either right or left
-                free(tmp)
+                // dereferencing to access and copy the values, without trail ^, the literal pointers would be copied
+                // node to be "deleted" will be equal to either right or left
+                node^ = tmp^
             }
+            free(tmp)
         } else { // two children case
             tmp: ^Node = minimum(node.right) // the successor to right of the deleted node
             node.data = tmp.data // assign the data in the temp to the node to be "deleted"
@@ -147,7 +149,7 @@ _remove_subtree :: proc(node: ^Node, data: int) -> ^Node {
     } else if data > node.data {
         node.right = _remove_subtree(node.right, data)
     } else { // node found
-        _free_tree(node)
+        free_subtree(node)
         node = nil
         return node
     }
@@ -165,14 +167,15 @@ minimum :: proc(node: ^Node) -> ^Node {
 }
 
 free_tree :: proc(tree: ^Avltree) {
-    _free_tree(tree.root)
+    free_subtree(tree.root)
     tree.root = nil
 }
 
-_free_tree :: proc(node: ^Node) {
-    if (node != nil) {
-        _free_tree(node.left)
-        _free_tree(node.right)
+free_subtree :: proc(node: ^Node) {
+    if node != nil {
+        i: int = 1
+        free_subtree(node.left)
+        free_subtree(node.right)
         free(node)
     }
 }

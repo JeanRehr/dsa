@@ -1,6 +1,8 @@
 package main
 
 import "core:fmt"
+import "core:mem"
+
 
 import "dsa/list"
 import "dsa/avltree"
@@ -166,6 +168,30 @@ handle_tree_ops :: proc(tree_user: ^avltree.Avltree) {
 }
 
 main :: proc() {
+    // Lets wrap the context allocator with a tracking allocator
+	// This will track memory leaks from the context.allocator
+	track_alloc: mem.Tracking_Allocator
+	mem.tracking_allocator_init(&track_alloc, context.allocator)
+	context.allocator = mem.tracking_allocator(&track_alloc)
+	defer {
+		// At the end of the program, lets print out the results
+		fmt.eprintf("\n")
+		// Memory leaks
+		for _, entry in track_alloc.allocation_map {
+			fmt.eprintf("- %v leaked %v bytes\n", entry.location, entry.size)
+		}
+		// Double free etc.
+		for entry in track_alloc.bad_free_array {
+			fmt.eprintf("- %v bad free\n", entry.location)
+		}
+		mem.tracking_allocator_destroy(&track_alloc)
+		fmt.eprintf("\n")
+
+		// Free the temp_allocator so we don't forget it
+		// The temp_allocator can be used to allocate temporary memory
+		free_all(context.temp_allocator)
+	}
+
     tree_int: avltree.Avltree
     list_int: list.List
 
@@ -179,6 +205,17 @@ main :: proc() {
         "AVLTree",
         "Exit",
     }
+
+    avltree.insert(&tree_int, 1)
+    avltree.insert(&tree_int, 2)
+    avltree.insert(&tree_int, 3)
+    avltree.insert(&tree_int, 4)
+    avltree.insert(&tree_int, 5)
+    avltree.insert(&tree_int, 6)
+    avltree.insert(&tree_int, 7)
+    avltree.insert(&tree_int, 8)
+    avltree.insert(&tree_int, 9)
+    avltree.insert(&tree_int, 10) 
 
     for {
         display_menu("Select DSA Menu", select_dsa_menu_items)

@@ -34,7 +34,7 @@ parse_buf :: proc(buf: []byte) -> (string,  Parse_Error) {
         return input_str, Parse_Error.No_Input
     }
 
-    // ascii value for 0 and 9, value for negative (-) is 45
+    // ascii value for 0 and 9, value for negative (-) is 45 (+) is 43
     if (buf[0] != 45 || buf[0] != 43) && (buf[0] < 48 || buf[0] > 57) {
         return input_str, Parse_Error.Not_Number
     }
