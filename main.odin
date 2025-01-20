@@ -19,7 +19,7 @@ display_menu :: proc(menu_name: string, menu_items: []string) {
     fmt.printf("--------------------------------------------------\n")
 }
 
-// this proc and delete_menu has an error return value to propagate it up to the handle_list_ops procedure
+// this proc and delete_menu has an error return value to propagate it up to the handle_list_ops, which has the loop
 insert_menu :: proc(list_user: ^list.List) -> input.Parse_Error {
     insert_menu_items: []string = {
         "Insert at head.",
@@ -168,6 +168,7 @@ handle_tree_ops :: proc(tree_user: ^avltree.Avltree) {
 }
 
 main :: proc() {
+    /*
     // Lets wrap the context allocator with a tracking allocator
 	// This will track memory leaks from the context.allocator
 	track_alloc: mem.Tracking_Allocator
@@ -191,6 +192,7 @@ main :: proc() {
 		// The temp_allocator can be used to allocate temporary memory
 		free_all(context.temp_allocator)
 	}
+    */
 
     tree_int: avltree.Avltree
     list_int: list.List
@@ -205,17 +207,6 @@ main :: proc() {
         "AVLTree",
         "Exit",
     }
-
-    avltree.insert(&tree_int, 1)
-    avltree.insert(&tree_int, 2)
-    avltree.insert(&tree_int, 3)
-    avltree.insert(&tree_int, 4)
-    avltree.insert(&tree_int, 5)
-    avltree.insert(&tree_int, 6)
-    avltree.insert(&tree_int, 7)
-    avltree.insert(&tree_int, 8)
-    avltree.insert(&tree_int, 9)
-    avltree.insert(&tree_int, 10) 
 
     for {
         display_menu("Select DSA Menu", select_dsa_menu_items)
