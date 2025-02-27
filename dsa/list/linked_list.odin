@@ -5,39 +5,39 @@ import "core:mem"
 import "core:os"
 import "core:strconv"
 
-Node :: struct {
-    data: int,
-    next: ^Node,
+Node :: struct($Data: typeid) {
+    data: Data,
+    next: ^Node(Data),
 }
 
-List :: struct {
+List :: struct($Data: typeid) {
     _size: int,
-    head: ^Node,
+    head: ^Node(Data),
 }
 
-create_node :: proc(data: int) -> ^Node {
-    new_node: ^Node = new(Node)
+create_node :: proc(data: $Data) -> ^Node(Data) {
+    new_node: ^Node(Data) = new(Node(Data))
     new_node.data = data
     new_node.next = nil
     return new_node
 }
 
-insert_head :: proc(list: ^List, data: int) {
-    new_node: ^Node = create_node(data)
+insert_head :: proc(list: ^List($Data), data: Data) {
+    new_node: ^Node(Data) = create_node(data)
     new_node.next = list.head
     list.head = new_node
     list._size += 1
 }
 
-insert_tail :: proc(list: ^List, data: int) {
-    new_node: ^Node = create_node(data)
+insert_tail :: proc(list: ^List($Data), data: Data) {
+    new_node: ^Node(Data) = create_node(data)
     if list._size == 0 {
         list.head = new_node
         list._size += 1
         return
     }
 
-    current: ^Node = list.head
+    current: ^Node(Data) = list.head
     for current.next != nil {
         current = current.next
     }
@@ -45,8 +45,8 @@ insert_tail :: proc(list: ^List, data: int) {
     list._size += 1
 }
 
-insert_at :: proc(list: ^List, data: int, pos: int) {
-    new_node: ^Node = create_node(data)
+insert_at :: proc(list: ^List($Data) , data: Data, pos: int) {
+    new_node: ^Node(Data) = create_node(data)
     if list._size == 0 {
         list.head = new_node
         list._size += 1
@@ -63,24 +63,24 @@ insert_at :: proc(list: ^List, data: int, pos: int) {
         return
     }
 
-    current: ^Node = list.head
+    current: ^Node(Data) = list.head
     for i := 0; i < pos - 1; i += 1 {
         current = current.next
     }
 
-    tmp: ^Node = current.next
+    tmp: ^Node(Data) = current.next
     current.next = new_node
     new_node.next = tmp
     list._size += 1
 }
 
-delete_head :: proc(list: ^List) {
+delete_head :: proc(list: ^List($Data) ) {
     if list._size == 0 {
         fmt.println("List is empty.")
         return
     }
 
-    tmp: ^Node = list.head
+    tmp: ^Node(Data) = list.head
 
     list.head = list.head.next
 
@@ -88,7 +88,7 @@ delete_head :: proc(list: ^List) {
     list._size -= 1
 }
 
-delete_tail :: proc(list: ^List) {
+delete_tail :: proc(list: ^List($Data) ) {
     if list._size == 0 {
         fmt.println("List is empty.")
         return
@@ -100,20 +100,20 @@ delete_tail :: proc(list: ^List) {
         return
     }
 
-    second_last: ^Node = list.head
+    second_last: ^Node(Data) = list.head
     for i := 0; i < list._size - 2; i += 1{
         second_last = second_last.next
     }
 
-    tmp: ^Node = second_last.next
+    tmp: ^Node(Data) = second_last.next
     second_last.next = nil
 
     free(tmp)
     list._size -= 1
 }
 
-delete_value :: proc(list: ^List, data: int) {
-    current: ^Node = list.head
+delete_value :: proc(list: ^List($Data) , data: Data) {
+    current: ^Node(Data) = list.head
     
     if current == nil {
         fmt.println("List is empty.")
@@ -127,7 +127,7 @@ delete_value :: proc(list: ^List, data: int) {
         return
     }
 
-    previous: ^Node
+    previous: ^Node(Data)
     for current != nil && current.data != data {
         previous = current
         current = current.next
@@ -143,7 +143,7 @@ delete_value :: proc(list: ^List, data: int) {
     list._size -= 1
 }
 
-delete_at :: proc(list: ^List, pos: int) {
+delete_at :: proc(list: ^List($Data) , pos: int) {
     if list._size == 0 {
         fmt.println("List is empty.")
         return
@@ -159,12 +159,12 @@ delete_at :: proc(list: ^List, pos: int) {
         return
     }
 
-    current: ^Node = list.head
+    current: ^Node(Data) = list.head
     for i := 0; i < pos - 1; i += 1 {
         current = current.next
     }
 
-    tmp: ^Node = current.next
+    tmp: ^Node(Data) = current.next
 
     current.next = tmp.next
 
@@ -173,9 +173,9 @@ delete_at :: proc(list: ^List, pos: int) {
     list._size -= 1
 }
 
-free_list :: proc(list: ^List) {
-    current: ^Node = list.head
-    next: ^Node
+free_list :: proc(list: ^List($Data) ) {
+    current: ^Node(Data) = list.head
+    next: ^Node(Data)
     for current != nil {
         next = current.next
         free(current)
@@ -185,10 +185,14 @@ free_list :: proc(list: ^List) {
     list.head = nil
 }
 
-print_list :: proc(list: ^List) {
-    current: ^Node = list.head
+print_list :: proc(list: ^List($Data) ) {
+    current: ^Node(Data) = list.head
     for current != nil {
-        fmt.printf("%d -> ", current.data)
+        when Data == string {
+            fmt.printf("%v (len: %d) -> ", current.data, len(current.data))    
+        } else {
+            fmt.printf("%v -> ", current.data)
+        }
         current = current.next
     }
     fmt.printfln("nil\nSize: %d", list._size)
